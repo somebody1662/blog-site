@@ -9,7 +9,8 @@ export default config({
 	collections: {
 		posts: collection({
 			label: '文章',
-			path: 'src/content/blog/[slug]',
+			// Keystatic 要求路径带 glob（/*）；slug 由文件名（不含扩展名）推导，与路由 /blog/<文件名>/ 一致
+			path: 'src/content/blog/*',
 			format: { contentField: 'content' },
 			// 不设 slugField：使用文件名（不含扩展名）作为 slug，与路由 /blog/<文件名>/ 一致
 			columns: ['title', 'pubDate', 'category', 'draft'],
