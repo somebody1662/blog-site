@@ -11,10 +11,17 @@ export default config({
 			label: '文章',
 			// Keystatic 要求路径带 glob（/*）；slug 由文件名（不含扩展名）推导，与路由 /blog/<文件名>/ 一致
 			path: 'src/content/blog/*',
+			// slugField 必填：指向专用 slug 字段（独立于标题，避免"改标题=改文件名"）
+			slugField: 'slug',
 			format: { contentField: 'content' },
-			// 不设 slugField：使用文件名（不含扩展名）作为 slug，与路由 /blog/<文件名>/ 一致
 			columns: ['title', 'pubDate', 'category', 'draft'],
 			schema: {
+				slug: fields.slug({
+					name: {
+						label: 'Slug（文件名/URL）',
+						description: '英文小写，例如 my-first-post。创建后不建议修改（会改变文章 URL）。',
+					},
+				}),
 				title: fields.text({ label: '标题', validation: { isRequired: true } }),
 				description: fields.text({
 					label: '摘要',
