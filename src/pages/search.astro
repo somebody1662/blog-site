@@ -1,0 +1,119 @@
+---
+import BaseHead from '../components/BaseHead.astro';
+import Footer from '../components/Footer.astro';
+import Header from '../components/Header.astro';
+import { SITE_TITLE } from '../consts';
+---
+
+<!doctype html>
+<html lang="zh-CN">
+	<head>
+		<BaseHead title={`搜索 · ${SITE_TITLE}`} description="站内文章搜索" />
+		<style>
+			.search-title {
+				font-size: 2em;
+				margin: 0 0 1em 0;
+			}
+			#search {
+				width: 100%;
+				max-width: 480px;
+				padding: 0.7em 1em;
+				font-size: 1em;
+				font-family: inherit;
+				color: rgb(var(--gray-dark));
+				background: #fff;
+				border: 1px solid rgb(var(--gray-light));
+				border-radius: 6px;
+			}
+			#search:focus {
+				outline: none;
+				border-color: var(--accent);
+			}
+			#results {
+				list-style: none;
+				padding: 0;
+				margin-top: 2em;
+			}
+			#results li {
+				padding: 1.1em 0;
+				border-bottom: 1px solid rgb(var(--gray-light));
+			}
+			#results a {
+				text-decoration: none;
+				border-bottom: none;
+			}
+			#results .title {
+				display: block;
+				font-size: 1.25em;
+				color: rgb(var(--black));
+				margin-bottom: 0.2em;
+			}
+			#results a:hover .title {
+				color: var(--accent);
+			}
+			#results .excerpt {
+				color: rgb(var(--gray));
+				font-size: 0.9em;
+			}
+			.empty {
+				color: rgb(var(--gray));
+			}
+		</style>
+	</head>
+	<body>
+		<Header />
+		<main>
+			<h1 class="search-title">搜索</h1>
+			<input id="search" type="search" placeholder="输入关键词搜索文章…" />
+			<ul id="results"></ul>
+			<p class="empty" id="empty">输入关键词开始搜索。</p>
+		</main>
+		<Footer />
+
+		<script src="/pagefind/pagefind.js" is:inline async></script>
+		<script is:inline>
+			window.addEventListener('DOMContentLoaded', async () => {
+				const input = document.getElementById('search');
+				const results = document.getElementById('results');
+				const empty = document.getElementById('empty');
+				if (!input || !results || !empty) return;
+				input.addEventListener('input', async () => {
+					const query = input.value.trim();
+					if (!query) {
+						results.innerHTML = '';
+						empty.style.display = '';
+						empty.textContent = '输入关键词开始搜索。';
+						return;
+					}
+					if (!window.pagefind) return;
+					const search = await window.pagefind.search(query);
+					results.innerHTML = '';
+					if (search.results.length === 0) {
+						empty.style.display = '';
+						empty.textContent = '没有找到匹配的文章。';
+						return;
+					}
+					empty.style.display = 'none';
+					for (const r of search.results.slice(0, 10)) {
+						const data = await r.data();
+						const li = document.createElement('li');
+						const a = document.createElement('a');
+						a.href = data.url;
+						const title = document.createElement('span');
+						title.className = 'title';
+						title.textContent = data.meta.title;
+						a.appendChild(title);
+						if (data.excerpt) {
+							const excerpt = document.createElement('span');
+							excerpt.className = 'excerpt';
+							excerpt.innerHTML = data.excerpt;
+							a.appendChild(excerpt);
+						}
+						li.appendChild(a);
+						results.appendChild(li);
+					}
+				});
+			});
+		</script>
+	</body>
+</html>

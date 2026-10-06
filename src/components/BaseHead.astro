@@ -11,11 +11,12 @@ interface Props {
 	title: string;
 	description: string;
 	image?: ImageMetadata;
+	jsonLd?: string;
 }
 
 const canonicalURL = new URL(Astro.url.pathname, Astro.site);
 
-const { title, description, image = FallbackImage } = Astro.props;
+const { title, description, image = FallbackImage, jsonLd } = Astro.props;
 ---
 
 <!-- Global Metadata -->
@@ -50,3 +51,5 @@ const { title, description, image = FallbackImage } = Astro.props;
 
 <!-- Twitter -->
 <meta name="twitter:card" content="summary_large_image" />
+
+{jsonLd && <script type="application/ld+json" is:inline set:html={jsonLd} />}

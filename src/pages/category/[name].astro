@@ -6,23 +6,36 @@ import FormattedDate from '../../components/FormattedDate.astro';
 import Header from '../../components/Header.astro';
 import { SITE_DESCRIPTION, SITE_TITLE } from '../../consts';
 
-const posts = (await getCollection('blog', ({ data }) => !data.draft)).sort(
-	(a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
-);
-const categories = [...new Set(posts.map((p) => p.data.category))].sort();
+export async function getStaticPaths() {
+	const posts = await getCollection('blog', ({ data }) => !data.draft);
+	const categories = [...new Set(posts.map((p) => p.data.category))].sort();
+	return categories.map((category) => ({
+		params: { name: category },
+		props: {
+			category,
+			posts: posts
+				.filter((p) => p.data.category === category)
+				.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()),
+		},
+	}));
+}
+
+type Props = {
+	category: string;
+	posts: Awaited<ReturnType<typeof getCollection>>;
+};
+
+const { category, posts } = Astro.props;
 ---
 
 <!doctype html>
 <html lang="zh-CN">
 	<head>
-		<BaseHead title={`文章 · ${SITE_TITLE}`} description={SITE_DESCRIPTION} />
+		<BaseHead title={`分类：${category} · ${SITE_TITLE}`} description={SITE_DESCRIPTION} />
 		<style>
 			.page-title {
-				font-size: 2em;
+				font-size: 1.9em;
 				margin: 0 0 0.2em 0;
-			}
-			.cats {
-				margin: 0 0 2em 0;
 			}
 			.post-item {
 				padding: 1.4em 0;
@@ -43,31 +56,19 @@ const categories = [...new Set(posts.map((p) => p.data.category))].sort();
 				margin-bottom: 0.4em;
 			}
 			.post-item .title {
-				margin: 0 0 0.3em 0;
-				font-size: 1.45em;
+				margin: 0;
+				font-size: 1.4em;
 				color: rgb(var(--black));
 			}
 			.post-item a:hover .title {
 				color: var(--accent);
-			}
-			.post-item .summary {
-				margin: 0;
-				color: rgb(var(--gray));
-				font-size: 0.95em;
 			}
 		</style>
 	</head>
 	<body>
 		<Header />
 		<main>
-			<h1 class="page-title">全部文章</h1>
-			<p class="cats">
-				{
-					categories.map((category) => (
-						<a class="tag" href={`/category/${category}/`}>{category}</a>
-					))
-				}
-			</p>
+			<h1 class="page-title">分类：{category}</h1>
 			<section>
 				{
 					posts.map((post) => (
@@ -75,10 +76,8 @@ const categories = [...new Set(posts.map((p) => p.data.category))].sort();
 							<a href={`/blog/${post.id}/`}>
 								<div class="meta">
 									<FormattedDate date={post.data.pubDate} />
-									<span class="tag">{post.data.category}</span>
 								</div>
 								<h3 class="title">{post.data.title}</h3>
-								<p class="summary">{post.data.description}</p>
 							</a>
 						</article>
 					))

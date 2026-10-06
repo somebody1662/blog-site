@@ -5,7 +5,7 @@ import { z } from 'astro/zod';
 const blog = defineCollection({
 	// Load Markdown and MDX files in the `src/content/blog/` directory.
 	loader: glob({ base: './src/content/blog', pattern: '**/*.{md,mdx}' }),
-	// Type-check frontmatter using a schema
+	// Type-check frontmatter using a schema. 漏填/类型不符会在构建时报错。
 	schema: ({ image }) =>
 		z.object({
 			title: z.string(),
@@ -14,6 +14,10 @@ const blog = defineCollection({
 			pubDate: z.coerce.date(),
 			updatedDate: z.coerce.date().optional(),
 			heroImage: z.optional(image()),
+			// 内容模型扩展字段
+			category: z.string().default('随笔'),
+			tags: z.array(z.string()).default([]),
+			draft: z.boolean().default(false),
 		}),
 });
 

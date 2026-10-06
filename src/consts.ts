@@ -1,5 +1,4 @@
-// Place any global data in this file.
-// You can import this data from anywhere in your site by using the `import` keyword.
-
-export const SITE_TITLE = 'Astro Blog';
-export const SITE_DESCRIPTION = 'Welcome to my website!';
+// 站点全局配置：站名、简介在这里改，全站生效。
+export const SITE_TITLE = '我的博客';
+export const SITE_DESCRIPTION = '一个用 Astro 构建的极简博客';
+export const SITE_AUTHOR = 'phezz';

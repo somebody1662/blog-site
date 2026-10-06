@@ -1,56 +1,92 @@
 ---
-import { Image } from 'astro:assets';
 import type { CollectionEntry } from 'astro:content';
 import BaseHead from '../components/BaseHead.astro';
 import Footer from '../components/Footer.astro';
 import FormattedDate from '../components/FormattedDate.astro';
 import Header from '../components/Header.astro';
 
-type Props = CollectionEntry<'blog'>['data'];
+type Props = CollectionEntry<'blog'>['data'] & {
+	prev?: CollectionEntry<'blog'> | null;
+	next?: CollectionEntry<'blog'> | null;
+};
 
-const { title, description, pubDate, updatedDate, heroImage } = Astro.props;
+const { title, description, pubDate, updatedDate, category, tags, prev, next } = Astro.props;
+
+const jsonLd = JSON.stringify({
+	'@context': 'https://schema.org',
+	'@type': 'BlogPosting',
+	headline: title,
+	description,
+	datePublished: pubDate.toISOString(),
+	...(updatedDate && { dateModified: updatedDate.toISOString() }),
+	articleSection: category,
+	keywords: tags.join(', '),
+	inLanguage: 'zh-CN',
+});
 ---
 
-<html lang="en">
+<html lang="zh-CN">
 	<head>
-		<BaseHead title={title} description={description} />
+		<BaseHead title={title} description={description} jsonLd={jsonLd} />
 		<style>
-			main {
-				width: calc(100% - 2em);
-				max-width: 100%;
-				margin: 0;
+			.post-head {
+				margin-bottom: 2.2em;
+				text-align: center;
 			}
-			.hero-image {
-				width: 100%;
+			.post-head .meta {
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				flex-wrap: wrap;
+				gap: 0.6em 1em;
+				color: rgb(var(--gray));
+				font-family: Consolas, monospace;
+				font-size: 0.82em;
+				margin-bottom: 0.8em;
 			}
-			.hero-image img {
-				display: block;
+			.post-head h1 {
+				margin: 0 0 0.6em 0;
+				font-size: 2.2em;
+				line-height: 1.3;
+			}
+			.post-head .meta-tags {
+				margin: 0 0 1.6em 0;
+			}
+			.post-head hr {
+				width: 48px;
 				margin: 0 auto;
-				border-radius: 12px;
-				box-shadow: var(--box-shadow);
+				border-top: 2px solid var(--accent);
 			}
 			.prose {
-				width: 720px;
-				max-width: calc(100% - 2em);
-				margin: auto;
-				padding: 1em;
-				color: rgb(var(--gray-dark));
+				width: 100%;
 			}
-			.title {
-				margin-bottom: 1em;
-				padding: 1em 0;
-				text-align: center;
-				line-height: 1;
+			.pager {
+				display: flex;
+				justify-content: space-between;
+				gap: 1em;
+				margin-top: 3em;
+				padding-top: 1.5em;
+				border-top: 1px solid rgb(var(--gray-light));
+				font-size: 0.95em;
 			}
-			.title h1 {
-				margin: 0 0 0.5em 0;
+			.pager a {
+				max-width: 45%;
+				border-bottom: none;
 			}
-			.date {
-				margin-bottom: 0.5em;
+			.pager .next {
+				text-align: right;
+			}
+			.pager .dir {
+				display: block;
+				font-family: Consolas, monospace;
+				font-size: 0.75em;
 				color: rgb(var(--gray));
+				margin-bottom: 0.2em;
 			}
-			.last-updated-on {
-				font-style: italic;
+			@media (max-width: 720px) {
+				.post-head h1 {
+					font-size: 1.7em;
+				}
 			}
 		</style>
 	</head>
@@ -59,27 +95,48 @@ const { title, description, pubDate, updatedDate, heroImage } = Astro.props;
 		<Header />
 		<main>
 			<article>
-				<div class="hero-image">
-					{heroImage && <Image width={1020} height={510} src={heroImage} alt="" />}
-				</div>
+				<header class="post-head">
+					<p class="meta">
+						<FormattedDate date={pubDate} />
+						{
+							updatedDate && (
+								<span class="updated">更新于 <FormattedDate date={updatedDate} /></span>
+							)
+						}
+					</p>
+					<h1>{title}</h1>
+					<p class="meta-tags">
+						<a class="tag" href={`/category/${category}/`}>{category}</a>
+						{
+							tags.map((tag) => (
+								<a class="tag" href={`/tags/${tag}/`}>{tag}</a>
+							))
+						}
+					</p>
+					<hr />
+				</header>
 				<div class="prose">
-					<div class="title">
-						<div class="date">
-							<FormattedDate date={pubDate} />
-							{
-								updatedDate && (
-									<div class="last-updated-on">
-										Last updated on <FormattedDate date={updatedDate} />
-									</div>
-								)
-							}
-						</div>
-						<h1>{title}</h1>
-						<hr />
-					</div>
 					<slot />
 				</div>
 			</article>
+			<nav class="pager">
+				{
+					prev && (
+						<a class="prev" href={`/blog/${prev.id}/`}>
+							<span class="dir">上一篇</span>
+							{prev.data.title}
+						</a>
+					)
+				}
+				{
+					next && (
+						<a class="next" href={`/blog/${next.id}/`}>
+							<span class="dir">下一篇</span>
+							{next.data.title}
+						</a>
+					)
+				}
+			</nav>
 		</main>
 		<Footer />
 	</body>
