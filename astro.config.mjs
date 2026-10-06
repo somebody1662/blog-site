@@ -14,7 +14,9 @@ const keystaticEnabled = process.env.KEYSTATIC !== 'false';
 
 // https://astro.build/config
 export default defineConfig({
-  site: 'https://blog-site.pages.dev',
+  // 站点地址：当前线上部署为 Cloudflare Workers 静态资源域名；
+  // 将来绑定自定义域名后，把这里改为正式域名并重新构建即可。
+  site: 'https://blog-site.sport17697287.workers.dev',
   integrations: [
     react(),
     mdx(),
