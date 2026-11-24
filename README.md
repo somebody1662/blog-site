@@ -54,6 +54,18 @@ All commands are run from the root of the project, from a terminal:
 | `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
 | `npm run astro -- --help` | Get help using the Astro CLI                     |
 
+## 构建与部署
+
+生产构建需要关闭 Keystatic（后台 `/keystatic` 路由是 SSR，纯静态输出不需要 server adapter）：
+
+```sh
+npm run build:prod   # cross-env KEYSTATIC=false astro build && pagefind --site dist
+```
+
+输出到 `dist/`，由 Cloudflare Workers 静态资产托管（见 `wrangler.toml`）。
+
+CI 见 `.github/workflows/ci.yml`：每次 push / PR 执行 `npm ci` + `npm run build:prod`，构建不过则 PR 不可合并。
+
 ## 👀 Want to learn more?
 
 Check out [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).

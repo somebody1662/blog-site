@@ -8,7 +8,7 @@
   "scripts": {
     "dev": "astro dev",
     "build": "astro build && pagefind --site dist",
-    "build:prod": "KEYSTATIC=false astro build && pagefind --site dist",
+    "build:prod": "cross-env KEYSTATIC=false astro build && pagefind --site dist",
     "preview": "astro preview",
     "astro": "astro"
   },
@@ -30,6 +30,7 @@
     "esbuild": true
   },
   "devDependencies": {
+    "cross-env": "^10.1.0",
     "pagefind": "^1.5.2"
   }
 }
