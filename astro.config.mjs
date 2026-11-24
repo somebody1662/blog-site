@@ -8,9 +8,14 @@ import tailwindcss from '@tailwindcss/vite';
 import react from '@astrojs/react';
 import keystatic from '@keystatic/astro';
 
-// Keystatic 后台路由是服务端渲染，仅在本地开发（npm run dev）时启用；
-// 生产构建（npm run build）时禁用，保持纯静态输出、无需 server adapter。
-const keystaticEnabled = process.env.KEYSTATIC !== 'false';
+// Keystatic 后台路由是服务端渲染（SSR），只在本地 `astro dev` 时挂载；
+// `astro build` 时自动禁用，保持纯静态输出、无需 server adapter。
+// 注意：不再依赖调用方手动设置 KEYSTATIC=false —— 漏设就会撞 [NoAdapterInstalled]，
+// 这点已在 CI 和 Cloudflare 构建里踩过。需要强制开关时仍可用 KEYSTATIC=true/false 覆盖。
+const isDevCommand = process.argv.slice(2).includes('dev');
+const keystaticEnabled =
+  process.env.KEYSTATIC === 'true' ||
+  (isDevCommand && process.env.KEYSTATIC !== 'false');
 
 // https://astro.build/config
 export default defineConfig({
